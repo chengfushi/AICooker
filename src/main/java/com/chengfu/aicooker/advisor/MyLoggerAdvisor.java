@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClientMessageAggregator;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
-import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.api.CallAdvisor;
 import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
 import org.springframework.ai.chat.client.advisor.api.StreamAdvisor;
@@ -22,7 +21,7 @@ import reactor.core.publisher.Flux;
 @Slf4j
 public class MyLoggerAdvisor implements CallAdvisor, StreamAdvisor {
 
-    private static final Logger logger = LoggerFactory.getLogger(SimpleLoggerAdvisor.class);
+    private static final Logger logger = LoggerFactory.getLogger(MyLoggerAdvisor.class);
 
     @Override
     public String getName() {

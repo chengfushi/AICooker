@@ -58,6 +58,14 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- JSON Schema -->
+        <dependency>
+            <groupId>com.github.victools</groupId>
+            <artifactId>jsonschema-generator</artifactId>
+            <version>4.38.0</version>
+        </dependency>
+
+
         <!-- Knife4j -->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>

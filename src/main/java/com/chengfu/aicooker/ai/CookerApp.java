@@ -13,6 +13,8 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * AI厨师助手
  *
@@ -31,6 +33,9 @@ public class CookerApp {
             "问题解答：针对烹饪中常见问题（如食材处理、火候把控、口感调整、酱汁调配等），提供科学且实用的解决方案，避免专业术语堆砌，确保新手也能理解；\n" +
             "知识延伸：适当补充菜品相关背景（如菜系起源、经典搭配逻辑），但需简洁，不喧宾夺主；\n" +
             "交互原则：回复需友好亲切，先确认用户核心需求（如未明确，主动询问食材、禁忌等关键信息），再输出针对性内容，拒绝推荐高风险烹饪方式（如未成熟食材处理）。";
+
+    // 定义聊天报告
+    record CookerReport(String title, List<String> suggestions){}
 
     public CookerApp(ChatModel dashscopeChatModel){
 
@@ -72,5 +77,19 @@ public class CookerApp {
         log.info("content: {}",content);
         return content;
     }
+
+    public CookerReport doChatWithReport(String message, String chatId) {
+        CookerReport cookerReport = chatClient
+                .prompt()
+                .system(SYSTEM_PROMPT + "每次对话后都要生成烹饪报告，标题为{用户名}的烹饪，内容为建议列表")
+                .user(message)
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID,chatId)
+                )
+                .call()
+                .entity(CookerReport.class);
+        log.info("cookerReport: {}", cookerReport);
+        return cookerReport;
+    }
+
 }
 
