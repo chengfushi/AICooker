@@ -1,5 +1,7 @@
 package com.chengfu.aicooker.ai;
 
+import com.chengfu.aicooker.advisor.MyLoggerAdvisor;
+import com.chengfu.aicooker.advisor.ReReadingAdvisor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 
@@ -31,6 +33,7 @@ public class CookerApp {
             "交互原则：回复需友好亲切，先确认用户核心需求（如未明确，主动询问食材、禁忌等关键信息），再输出针对性内容，拒绝推荐高风险烹饪方式（如未成熟食材处理）。";
 
     public CookerApp(ChatModel dashscopeChatModel){
+
         // 初始化基于内存的对话记忆
         MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .chatMemoryRepository(new InMemoryChatMemoryRepository())
@@ -41,7 +44,9 @@ public class CookerApp {
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
-                        MessageChatMemoryAdvisor.builder(chatMemory).build()
+                        MessageChatMemoryAdvisor.builder(chatMemory).build(),
+                        new MyLoggerAdvisor(),
+                        new ReReadingAdvisor()
                 ).build();
 
     }
