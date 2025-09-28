@@ -2,6 +2,7 @@ package com.chengfu.aicooker.ai;
 
 import com.chengfu.aicooker.advisor.MyLoggerAdvisor;
 import com.chengfu.aicooker.advisor.ReReadingAdvisor;
+import com.chengfu.aicooker.chatmemory.FileBasedChatMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 
@@ -40,10 +41,12 @@ public class CookerApp {
     public CookerApp(ChatModel dashscopeChatModel){
 
         // 初始化基于内存的对话记忆
-        MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
-                .chatMemoryRepository(new InMemoryChatMemoryRepository())
-                .maxMessages(20)
-                .build();
+        // MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
+        //         .chatMemoryRepository(new InMemoryChatMemoryRepository())
+        //         .maxMessages(20)
+        //         .build();
+        String fileDir = System.getProperty("user.dir") + "/chat-memory";
+        ChatMemory chatMemory = new FileBasedChatMemory(fileDir);
 
         // 创建基于DashScope的聊天客户端
         chatClient = ChatClient.builder(dashscopeChatModel)
