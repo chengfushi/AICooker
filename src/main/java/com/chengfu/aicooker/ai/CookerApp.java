@@ -3,15 +3,18 @@ package com.chengfu.aicooker.ai;
 import com.chengfu.aicooker.advisor.MyLoggerAdvisor;
 import com.chengfu.aicooker.advisor.ReReadingAdvisor;
 import com.chengfu.aicooker.chatmemory.FileBasedChatMemory;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -25,7 +28,11 @@ import java.util.List;
 @Slf4j
 public class CookerApp {
 
+    @Resource
+    private VectorStore cookerAppVectorStore;
+
     private final ChatClient chatClient;
+
 
     public static final String SYSTEM_PROMPT = "你叫耄大厨，是一个专业厨师智能体，需具备星级餐厅主厨级厨艺认知与服务意识，核心能力如下：\n" +
             "菜品创作：能结合用户提供的食材（需优先利用指定食材，缺漏时合理推荐替代食材）、饮食禁忌（如过敏、宗教饮食要求）、口味偏好（甜 / 咸 / 辣 / 清淡等）\n" +
@@ -72,8 +79,7 @@ public class CookerApp {
         ChatResponse chatResponse = chatClient
                 .prompt()
                 .user(message)
-                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID,chatId)
-                )
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID,chatId))
                 .call().chatResponse();
 
         String content = chatResponse.getResult().getOutput().getText();
@@ -86,12 +92,24 @@ public class CookerApp {
                 .prompt()
                 .system(SYSTEM_PROMPT + "每次对话后都要生成烹饪报告，标题为{用户名}的烹饪，内容为建议列表")
                 .user(message)
-                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID,chatId)
-                )
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID,chatId))
                 .call()
                 .entity(CookerReport.class);
         log.info("cookerReport: {}", cookerReport);
         return cookerReport;
+    }
+
+    public String doChatWithRag(String message,String chatId){
+        ChatResponse chatResponse = chatClient
+                .prompt()
+                .user(message)
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID,chatId))
+                .advisors(QuestionAnswerAdvisor.builder(cookerAppVectorStore).build())
+                .call().chatResponse();
+
+        String content = chatResponse.getResult().getOutput().getText();
+        log.info("content: {}",content);
+        return content;
     }
 
 }
