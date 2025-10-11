@@ -23,6 +23,9 @@ public class CookerAppVectorStoreConfig {
     @Resource
     public CookerAppDocumentLoader cookerAppDocumentLoader;
 
+    @Resource
+    VectorStore pgVectorStore;
+
     @Bean
     VectorStore cookerAppVectorStore(EmbeddingModel dashscopeEmbeddingModel) {
         SimpleVectorStore simpleVectorStore = SimpleVectorStore.builder(dashscopeEmbeddingModel)
