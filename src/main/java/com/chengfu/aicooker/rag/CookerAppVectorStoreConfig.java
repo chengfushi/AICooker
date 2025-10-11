@@ -16,17 +16,14 @@ import java.util.List;
  *
  * @author: cheng fu
  **/
-@Configuration
+// @Configuration
 @Slf4j
 public class CookerAppVectorStoreConfig {
 
     @Resource
     public CookerAppDocumentLoader cookerAppDocumentLoader;
 
-    @Resource
-    VectorStore pgVectorStore;
-
-    @Bean
+    // @Bean
     VectorStore cookerAppVectorStore(EmbeddingModel dashscopeEmbeddingModel) {
         SimpleVectorStore simpleVectorStore = SimpleVectorStore.builder(dashscopeEmbeddingModel)
                 .build();

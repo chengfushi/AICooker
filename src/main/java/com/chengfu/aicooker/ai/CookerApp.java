@@ -31,8 +31,8 @@ public class CookerApp {
     // @Resource
     // private VectorStore cookerAppVectorStore;
 
-    @Resource
-    private VectorStore pgVectorVectorStore;
+    // @Resource
+    // private VectorStore pgVectorVectorStore;
 
     private final ChatClient chatClient;
 
@@ -107,7 +107,7 @@ public class CookerApp {
                 .prompt()
                 .user(message)
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID,chatId))
-                .advisors(QuestionAnswerAdvisor.builder(pgVectorVectorStore).build())
+                // .advisors(QuestionAnswerAdvisor.builder(pgVectorVectorStore).build())
                 .call().chatResponse();
 
         String content = chatResponse.getResult().getOutput().getText();
