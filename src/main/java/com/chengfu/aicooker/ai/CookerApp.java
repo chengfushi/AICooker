@@ -14,6 +14,7 @@ import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +34,9 @@ public class CookerApp {
 
     // @Resource
     // private VectorStore pgVectorVectorStore;
+
+    @Resource
+    private ToolCallback[] allTools;
 
     private final ChatClient chatClient;
 
@@ -55,7 +59,7 @@ public class CookerApp {
         //         .chatMemoryRepository(new InMemoryChatMemoryRepository())
         //         .maxMessages(20)
         //         .build();
-        String fileDir = System.getProperty("user.dir") + "/chat-memory";
+        String fileDir = System.getProperty("user.dir") + "/tmp/chat-memory";
         ChatMemory chatMemory = new FileBasedChatMemory(fileDir);
 
         // 创建基于DashScope的聊天客户端
@@ -63,8 +67,8 @@ public class CookerApp {
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),
-                        new MyLoggerAdvisor(),
-                        new ReReadingAdvisor()
+                        new MyLoggerAdvisor()
+                        // new ReReadingAdvisor()
                 ).build();
 
     }
@@ -108,6 +112,19 @@ public class CookerApp {
                 .user(message)
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID,chatId))
                 // .advisors(QuestionAnswerAdvisor.builder(pgVectorVectorStore).build())
+                .call().chatResponse();
+
+        String content = chatResponse.getResult().getOutput().getText();
+        log.info("content: {}",content);
+        return content;
+    }
+
+    public String doChatWithTools(String message,String chatId){
+        ChatResponse chatResponse = chatClient
+                .prompt()
+                .user(message)
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID,chatId))
+                .toolCallbacks(allTools)
                 .call().chatResponse();
 
         String content = chatResponse.getResult().getOutput().getText();
